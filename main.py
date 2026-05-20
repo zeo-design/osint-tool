@@ -64,6 +64,5 @@ def main():
     
     else:
         console.print("[red]Invalid choice[/red]")
-
 if __name__ == "__main__":
     main()

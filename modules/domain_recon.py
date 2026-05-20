@@ -30,7 +30,11 @@ def run_dns(domain):
         table.add_column("Value", style="white")
         for record in ["A", "MX", "NS", "TXT", "CNAME"]:
             try:
-                answers = dns.resolver.resolve(domain, record)
+                resolver = dns.resolver.Resolver()
+                resolver.nameservers = ["8.8.8.8", "8.8.4.4"]
+                resolver.timeout = 10
+                resolver.lifetime = 10
+                answers = resolver.resolve(domain, record)
                 for ans in answers:
                     table.add_row(record, str(ans))
             except:
@@ -43,7 +47,7 @@ def run_ssl(domain):
     try:
         ctx = ssl.create_default_context()
         with ctx.wrap_socket(socket.socket(), server_hostname=domain) as s:
-            s.settimeout(5)
+            s.settimeout(10)
             s.connect((domain, 443))
             cert = s.getpeercert()
         table = Table(title="SSL Certificate")
@@ -61,19 +65,39 @@ def run_ssl(domain):
         console.print(f"[red]SSL failed: {e}[/red]")
 
 def run_spf_dkim(domain):
+    console.print("\n[bold yellow][ SPF / DKIM Check ][/bold yellow]")
     try:
-        answers = dns.resolver.resolve(domain, "TXT")
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = ["8.8.8.8", "8.8.4.4"]
+        resolver.timeout = 10
+        resolver.lifetime = 10
+        answers = resolver.resolve(domain, "TXT")
+        spf_found = False
         for r in answers:
-            if "v=spf1" in str(r):
-                console.print(f"[green]SPF Found:[/green] {r}")
-    except:
-        console.print("[red]No SPF record found[/red]")
-    for sel in ["default", "google", "mail", "selector1", "selector2"]:
+            txt = str(r).replace('"', '').strip()
+            if "v=spf1" in txt:
+                console.print(f"[green]SPF Found:[/green] {txt}")
+                spf_found = True
+        if not spf_found:
+            console.print("[red]No SPF record found — email spoofing may be possible[/red]")
+    except Exception as e:
+        console.print(f"[red]SPF check failed: {e}[/red]")
+
+    selectors = ["default", "google", "mail", "selector1", "selector2", "k1", "ms"]
+    dkim_found = False
+    for sel in selectors:
         try:
-            dns.resolver.resolve(f"{sel}._domainkey.{domain}", "TXT")
+            resolver = dns.resolver.Resolver()
+            resolver.nameservers = ["8.8.8.8", "8.8.4.4"]
+            resolver.timeout = 10
+            resolver.lifetime = 10
+            resolver.resolve(f"{sel}._domainkey.{domain}", "TXT")
             console.print(f"[green]DKIM Found:[/green] selector = {sel}")
+            dkim_found = True
         except:
             pass
+    if not dkim_found:
+        console.print("[red]No DKIM selectors found[/red]")
 
 def domain_recon(domain):
     console.print(f"\n[bold blue]Target: {domain}[/bold blue]\n")
