@@ -23,9 +23,9 @@ def main():
     console.print("  [cyan]1[/cyan] - Domain Recon")
     console.print("  [cyan]2[/cyan] - Email Intelligence")
     console.print("  [cyan]3[/cyan] - Google Dorking")
-    console.print("  [cyan]4[/cyan] - Run All")
-    console.print("  [cyan]5[/cyan] - Subdomain Enumeration")
-    console.print("  [cyan]6[/cyan] - IP Geolocation\n")
+    console.print("  [cyan]4[/cyan] - Subdomain Enumeration")
+    console.print("  [cyan]5[/cyan] - IP Geolocation")
+    console.print("  [cyan]6[/cyan] - Run All\n")
     
     choice = input("Enter choice (1-6): ").strip()
     
@@ -45,22 +45,22 @@ def main():
     
     elif choice == "4":
         domain = input("Enter domain: ").strip()
+        enumerate_subdomains(domain)
+    
+    elif choice == "5":
+        ip = input("Enter IP address: ").strip()
+        geolocate_ip(ip)
+    
+    elif choice == "6":
+        domain = input("Enter domain: ").strip()
         first = input("First name: ").strip()
         last = input("Last name: ").strip()
-        console.print("\n[bold yellow]Running full recon...[/bold yellow]\n")
+        console.print("\n[bold yellow]Running full recon in sequence...[/bold yellow]\n")
         domain_recon(domain)
         enumerate_subdomains(domain)
         geolocate_ip(domain)
         email_intel(first, last, domain)
         generate_dorks(domain)
-    
-    elif choice == "5":
-        domain = input("Enter domain: ").strip()
-        enumerate_subdomains(domain)
-    
-    elif choice == "6":
-        ip = input("Enter IP address: ").strip()
-        geolocate_ip(ip)
     
     else:
         console.print("[red]Invalid choice[/red]")
