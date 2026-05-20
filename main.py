@@ -3,6 +3,7 @@ from modules.email_intel import email_intel
 from modules.dorking import generate_dorks
 from modules.subdomains import enumerate_subdomains
 from modules.ip_geo import geolocate_ip
+from modules.username_search import search_username
 from rich.console import Console
 from rich.panel import Panel
 
@@ -11,7 +12,7 @@ console = Console()
 def show_banner():
     console.print(Panel.fit(
         "[bold cyan]OSINT Tool V1[/bold cyan]\n"
-        "[dim]Domain Recon | Email Intel | Google Dorking | Subdomains | IP Geo[/dim]\n"
+        "[dim]Domain Recon | Email Intel | Dorking | Subdomains | IP Geo | Username[/dim]\n"
         "[red]For authorized and legal use only.[/red]",
         border_style="cyan"
     ))
@@ -25,9 +26,10 @@ def main():
     console.print("  [cyan]3[/cyan] - Google Dorking")
     console.print("  [cyan]4[/cyan] - Subdomain Enumeration")
     console.print("  [cyan]5[/cyan] - IP Geolocation")
-    console.print("  [cyan]6[/cyan] - Run All\n")
+    console.print("  [cyan]6[/cyan] - Username Search")
+    console.print("  [cyan]7[/cyan] - Run All\n")
     
-    choice = input("Enter choice (1-6): ").strip()
+    choice = input("Enter choice (1-7): ").strip()
     
     if choice == "1":
         domain = input("Enter domain (e.g. google.com): ").strip()
@@ -52,17 +54,24 @@ def main():
         geolocate_ip(ip)
     
     elif choice == "6":
+        username = input("Enter username: ").strip()
+        search_username(username)
+    
+    elif choice == "7":
         domain = input("Enter domain: ").strip()
         first = input("First name: ").strip()
         last = input("Last name: ").strip()
+        username = input("Enter username to search: ").strip()
         console.print("\n[bold yellow]Running full recon in sequence...[/bold yellow]\n")
         domain_recon(domain)
         enumerate_subdomains(domain)
         geolocate_ip(domain)
         email_intel(first, last, domain)
         generate_dorks(domain)
+        search_username(username)
     
     else:
         console.print("[red]Invalid choice[/red]")
+
 if __name__ == "__main__":
     main()
