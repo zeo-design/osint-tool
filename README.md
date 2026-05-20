@@ -34,7 +34,7 @@ Phase 2 — Infrastructure Intelligence (In Progress)
 
 ---
 
-Planned Features
+Planned Features (coming soon)
 
 - Shodan integration
 - Username intelligence
