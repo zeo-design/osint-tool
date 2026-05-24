@@ -4,10 +4,20 @@ from modules.dorking import generate_dorks
 from modules.subdomains import enumerate_subdomains
 from modules.ip_geo import geolocate_ip
 from modules.username_search import search_username
+from report_generator import save_report
 from rich.console import Console
 from rich.panel import Panel
+import io
+import sys
 
 console = Console()
+
+def capture_output(func, *args):
+    buffer = io.StringIO()
+    sys.stdout = buffer
+    func(*args)
+    sys.stdout = sys.__stdout__
+    return buffer.getvalue()
 
 def show_banner():
     console.print(Panel.fit(
@@ -27,7 +37,7 @@ def main():
     console.print("  [cyan]4[/cyan] - Subdomain Enumeration")
     console.print("  [cyan]5[/cyan] - IP Geolocation")
     console.print("  [cyan]6[/cyan] - Username Search")
-    console.print("  [cyan]7[/cyan] - Run All\n")
+    console.print("  [cyan]7[/cyan] - Run All + Save Report\n")
     
     choice = input("Enter choice (1-7): ").strip()
     
@@ -62,13 +72,30 @@ def main():
         first = input("First name: ").strip()
         last = input("Last name: ").strip()
         username = input("Enter username to search: ").strip()
+        
         console.print("\n[bold yellow]Running full recon in sequence...[/bold yellow]\n")
+        
+        report_data = {}
+        
         domain_recon(domain)
-        enumerate_subdomains(domain)
+        report_data["Domain Recon"] = f"Target: {domain}"
+        
+        subdomains = enumerate_subdomains(domain)
+        report_data["Subdomains"] = str(subdomains)
+        
         geolocate_ip(domain)
+        report_data["IP Geolocation"] = f"Target: {domain}"
+        
         email_intel(first, last, domain)
+        report_data["Email Intelligence"] = f"{first} {last} @ {domain}"
+        
         generate_dorks(domain)
+        report_data["Google Dorking"] = f"Target: {domain}"
+        
         search_username(username)
+        report_data["Username Search"] = f"Username: {username}"
+        
+        save_report(domain, report_data)
     
     else:
         console.print("[red]Invalid choice[/red]")
